@@ -15,7 +15,7 @@ services:
       retries: 5
 
   budget-server:
-    image: ghcr.io/carson-networks/budget-server:v0.15.0
+    image: ghcr.io/carson-networks/budget-server:v0.16.0
     restart: unless-stopped
     depends_on:
       postgres:
@@ -34,7 +34,7 @@ services:
       - "127.0.0.1:9447:9447"
 
   web:
-    image: ghcr.io/carson-networks/budget:0.1.0
+    image: ghcr.io/carson-networks/budget:v0.2.0
     restart: unless-stopped
     depends_on:
       - budget-server
