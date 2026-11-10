@@ -14,4 +14,6 @@ make stop    # stop (database is kept in a volume)
 make logs    # follow logs
 ```
 
-The app is at http://localhost:8080 and the API at http://127.0.0.1:9447.
+The app is at http://localhost:8080. The API is not exposed; the web container proxies it.
+
+To reach the app by another hostname, set `SITE_HOSTS` in `.env` (space-separated, e.g. `SITE_HOSTS=localhost budget.home.arpa`). Requests for any other host get 403.
