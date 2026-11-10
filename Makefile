@@ -1,6 +1,6 @@
 .PHONY: start stop logs
 
-start: ## Pull the latest images and start the stack
+start: ## Pull images and start the stack
 	docker compose pull
 	docker compose up --detach
 

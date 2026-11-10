@@ -4,8 +4,7 @@ Runs the budget app locally with Docker Compose: Postgres, [budget-server](https
 
 ## Setup
 
-1. Log in to GHCR so the images can be pulled: `docker login ghcr.io`
-2. Copy `.env.example` to `.env` and fill in your Plaid keys and a Postgres password.
+Copy `.env.example` to `.env` and fill in your Plaid keys and a Postgres password.
 
 ## Usage
 
