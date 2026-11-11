@@ -3,13 +3,6 @@
   "extends": ["config:best-practices", ":separateMultipleMajorReleases"],
   "packageRules": [
     {
-      "description": "Group first-party budget images",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["ghcr.io/carson-networks/**"],
-      "groupName": "budget images",
-      "groupSlug": "budget-images"
-    },
-    {
       "description": "Group GitHub Actions updates",
       "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions",
