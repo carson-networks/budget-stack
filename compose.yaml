@@ -31,7 +31,7 @@ services:
       retries: 3
 
   web:
-    image: ghcr.io/carson-networks/budget:v0.3.0
+    image: ghcr.io/carson-networks/budget:v0.8.0@sha256:82f5d92cdc7226e5c40bf3bafcb7351b6eee5ed8b9cefb2ad65a9bdf26d48f07
     restart: unless-stopped
     networks:
       - frontend
