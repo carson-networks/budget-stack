@@ -1,0 +1,11 @@
+# Builds budget-server and web from sibling checkouts; used by `make start-local`.
+services:
+  budget-server:
+    image: ghcr.io/carson-networks/budget-server:local
+    build:
+      context: ../budget-server
+
+  web:
+    image: ghcr.io/carson-networks/budget:local
+    build:
+      context: ../budget
