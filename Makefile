@@ -27,6 +27,7 @@ check-siblings:
 		test -d "$$dir" || { echo "missing sibling checkout: $$dir (clone it next to budget-stack)"; exit 1; }; \
 	done
 
-# The budget-server image builds with -mod=vendor and vendor/ is gitignored.
+# The budget-server image builds with -mod=vendor and vendor/ is gitignored; vendoring in Docker avoids needing Go here.
 vendor-server: check-siblings
-	cd ../budget-server && go mod vendor
+	docker run --rm -u "$$(id -u):$$(id -g)" -e GOPATH=/tmp/go -e GOCACHE=/tmp/go-cache \
+		-v "$(abspath ../budget-server)":/src -w /src golang:1.27-alpine go mod vendor
