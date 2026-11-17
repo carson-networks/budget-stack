@@ -1,12 +1,41 @@
 name: budget
 
+# Settings shared by the released and locally built services.
+x-web: &web
+  restart: unless-stopped
+  read_only: true
+  tmpfs:
+    - /data
+    - /config
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+
+x-budget-server: &budget-server
+  restart: unless-stopped
+  depends_on:
+    postgres:
+      condition: service_healthy
+  environment:
+    POSTGRES_ADDRESS: postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_DB: postgres
+    POSTGRES_USERNAME: postgres
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    PLAID_CLIENT_ID: ${PLAID_CLIENT_ID:?set PLAID_CLIENT_ID in .env}
+    PLAID_SECRET: ${PLAID_SECRET:?set PLAID_SECRET in .env}
+    PLAID_ENVIRONMENT: ${PLAID_ENVIRONMENT:-sandbox}
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+
 services:
   edge:
     image: caddy:2.11.9-alpine
     restart: unless-stopped
-    depends_on:
-      - web
-      - budget-server
     environment:
       SITE_HOSTS: ${SITE_HOSTS:-localhost 127.0.0.1}
     volumes:
@@ -30,44 +59,42 @@ services:
       timeout: 3s
       retries: 3
 
+  # Pinned releases: `make start`.
   web:
+    <<: *web
     image: ghcr.io/carson-networks/budget:v0.3.0
-    restart: unless-stopped
+    profiles: [release]
     networks:
       - frontend
-    read_only: true
-    tmpfs:
-      - /data
-      - /config
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges:true
 
   budget-server:
+    <<: *budget-server
     image: ghcr.io/carson-networks/budget-server:v0.19.0
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      POSTGRES_ADDRESS: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: postgres
-      POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      PLAID_CLIENT_ID: ${PLAID_CLIENT_ID:?set PLAID_CLIENT_ID in .env}
-      PLAID_SECRET: ${PLAID_SECRET:?set PLAID_SECRET in .env}
-      PLAID_ENVIRONMENT: ${PLAID_ENVIRONMENT:-sandbox}
+    profiles: [release]
     # default: reachable from edge and gives Plaid egress.
     networks:
       - default
       - db
-    read_only: true
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges:true
+
+  # Built from the sibling checkouts: `make start-local`. The aliases let edge reach them by the same names.
+  web-local:
+    <<: *web
+    build: ../budget
+    image: budget-web:local
+    profiles: [local]
+    networks:
+      frontend:
+        aliases: [web]
+
+  budget-server-local:
+    <<: *budget-server
+    build: ../budget-server
+    image: budget-server:local
+    profiles: [local]
+    networks:
+      default:
+        aliases: [budget-server]
+      db: {}
 
   postgres:
     image: postgres:18.6

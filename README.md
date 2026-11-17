@@ -9,9 +9,10 @@ Copy `.env.example` to `.env` and fill in your Plaid keys and a Postgres passwor
 ## Usage
 
 ```bash
-make start   # pull images and start
-make stop    # stop (database is kept in a volume)
-make logs    # follow logs
+make start         # pull the pinned releases and start
+make start-local   # build budget-server and web from ../budget-server and ../budget, start; rerun after changes
+make stop          # stop (database is kept in a volume)
+make logs          # follow logs
 ```
 
 The app is at http://localhost:8080. The `edge` proxy ([Caddyfile](Caddyfile)) is the only exposed service: it serves the web app and routes `/api/*` to budget-server.
@@ -20,7 +21,7 @@ To reach the app by another hostname, set `SITE_HOSTS` in `.env` (space-separate
 
 ## Developing across repos
 
-`make start-local` builds `budget-server` and `web` from sibling checkouts instead of pulling the pinned releases, so changes in several repos can be run together:
+[compose.yaml](compose.yaml) has two profiles. `release` runs the pinned `web` and `budget-server` images; `local` runs `web-local` and `budget-server-local`, built from sibling checkouts of whatever branch each is on:
 
 ```
 carson-networks/
@@ -29,11 +30,6 @@ carson-networks/
   budget-stack/    # this repo
 ```
 
-```bash
-make start-local                      # vendor Go modules, build both images, start the stack
-make rebuild-local s=budget-server    # rebuild and restart one service after a change (or s=web)
-```
-
-Local images are tagged `:local` ([compose.local.yaml](compose.local.yaml)). Check out whichever branch you want in each sibling repo first. `make start` goes back to the pinned releases.
+Postgres and `edge` are shared, so the database carries over when switching. `make start` and `make start-local` each stop the other profile's services first.
 
 The iOS Simulator reaches the stack at `http://localhost:8080/api`.

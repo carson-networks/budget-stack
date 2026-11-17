@@ -1,33 +1,21 @@
-.PHONY: start stop logs start-local rebuild-local check-siblings vendor-server
+.PHONY: start start-local stop logs
 
-LOCAL := docker compose -f compose.yaml -f compose.local.yaml
-SIBLINGS := ../budget-server ../budget
+ALL := docker compose --profile release --profile local
 
-start: ## Pull images and start the stack
-	docker compose pull
-	docker compose up --detach
+start: ## Pull the pinned releases and start the stack
+	$(ALL) stop budget-server-local web-local
+	docker compose --profile release pull
+	docker compose --profile release up --detach
 
-stop: ## Stop the stack (data is kept)
-	docker compose down
-
-logs: ## Follow logs from all services
-	docker compose logs --follow
-
-start-local: vendor-server ## Build budget-server and web from sibling checkouts and start the stack
-	$(LOCAL) build
-	$(LOCAL) up --detach
-
-rebuild-local: check-siblings ## Rebuild and restart one local service: make rebuild-local s=budget-server
-	@test -n "$(s)" || { echo "usage: make rebuild-local s=<budget-server|web>"; exit 1; }
-	@if [ "$(s)" = budget-server ]; then $(MAKE) --no-print-directory vendor-server; fi
-	$(LOCAL) up --detach --build --no-deps $(s)
-
-check-siblings:
-	@for dir in $(SIBLINGS); do \
-		test -d "$$dir" || { echo "missing sibling checkout: $$dir (clone it next to budget-stack)"; exit 1; }; \
-	done
-
-# The budget-server image builds with -mod=vendor and vendor/ is gitignored; vendoring in Docker avoids needing Go here.
-vendor-server: check-siblings
+# budget-server's image builds from a vendor/ directory it doesn't commit.
+start-local: ## Build budget-server and web from ../budget-server and ../budget and start the stack; rerun after changes
+	$(ALL) stop budget-server web
 	docker run --rm -u "$$(id -u):$$(id -g)" -e GOPATH=/tmp/go -e GOCACHE=/tmp/go-cache \
 		-v "$(abspath ../budget-server)":/src -w /src golang:1.27-alpine go mod vendor
+	docker compose --profile local up --detach --build
+
+stop: ## Stop the stack (data is kept)
+	$(ALL) down
+
+logs: ## Follow logs from all services
+	$(ALL) logs --follow
