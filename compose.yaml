@@ -34,7 +34,7 @@ x-budget-server: &budget-server
 
 services:
   edge:
-    image: caddy:2.11.9-alpine
+    image: caddy:2.11.9-alpine@sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0
     restart: unless-stopped
     environment:
       SITE_HOSTS: ${SITE_HOSTS:-localhost 127.0.0.1}
@@ -62,14 +62,14 @@ services:
   # Pinned releases: `make start`.
   web:
     <<: *web
-    image: ghcr.io/carson-networks/budget:v0.3.0
+    image: ghcr.io/carson-networks/budget:v0.3.0@sha256:6659a82d6b0b5f8984fe948112ca9b3eb02d295aa6607056239f3efb2368f18b
     profiles: [release]
     networks:
       - frontend
 
   budget-server:
     <<: *budget-server
-    image: ghcr.io/carson-networks/budget-server:v0.19.0
+    image: ghcr.io/carson-networks/budget-server:v0.19.0@sha256:ddf7ca3dc4b183de31e4b8cc979dab590283d2550d3f0eb1752f947d4a5d8ca6
     profiles: [release]
     # default: reachable from edge and gives Plaid egress.
     networks:
@@ -97,7 +97,7 @@ services:
       db: {}
 
   postgres:
-    image: postgres:18.6
+    image: postgres:18.6@sha256:e3d24f6906d0760bf4da0dae872415391ededefad23fd471c47dc53b0ddf3c42
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
