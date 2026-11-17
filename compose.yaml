@@ -69,7 +69,7 @@ services:
 
   budget-server:
     <<: *budget-server
-    image: ghcr.io/carson-networks/budget-server:v0.19.0
+    image: ghcr.io/carson-networks/budget-server:v0.21.0@sha256:52d52d4d36239461ed5d8996d59b2f36b638a06bc54f543397c27647f39d0485
     profiles: [release]
     # default: reachable from edge and gives Plaid egress.
     networks:
