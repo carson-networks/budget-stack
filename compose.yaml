@@ -62,7 +62,7 @@ services:
   # Pinned releases: `make start`.
   web:
     <<: *web
-    image: ghcr.io/carson-networks/budget:v0.3.0
+    image: ghcr.io/carson-networks/budget:v0.17.0@sha256:482f5a1ce53f6d44dffdec0af9813b8affb3594c5b71ad4bc1de1d55b03bbc73
     profiles: [release]
     networks:
       - frontend
